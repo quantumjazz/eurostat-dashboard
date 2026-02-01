@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eurostat Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 10px;
+            color: #1a365d;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+        .chart {
+            width: 100%;
+            height: 450px;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 450px;
+            color: #666;
+        }
+        .error {
+            color: #c53030;
+            padding: 20px;
+            background: #fed7d7;
+            border-radius: 8px;
+        }
+        .meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Eurostat Dashboard</h1>
+        <p class="subtitle">Economic indicators from the European Statistical Office</p>
+
+        <div class="chart-container">
+            <div class="chart-title">GDP per Capita (Chain linked volumes 2020, euro per capita)</div>
+            <div id="gdp-chart" class="chart">
+                <div class="loading">Loading data...</div>
+            </div>
+            <div class="meta" id="gdp-meta"></div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Labour Productivity per Hour Worked (Index, 2015=100)</div>
+            <div id="productivity-chart" class="chart">
+                <div class="loading">Loading data...</div>
+            </div>
+            <div class="meta" id="productivity-meta"></div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-container">
+                <div class="chart-title">GVA by Sector - Bulgaria (% of GDP)</div>
+                <div id="gva-bg-chart" class="chart">
+                    <div class="loading">Loading data...</div>
+                </div>
+                <div class="meta" id="gva-bg-meta"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">GVA by Sector - EU27 (% of GDP)</div>
+                <div id="gva-eu-chart" class="chart">
+                    <div class="loading">Loading data...</div>
+                </div>
+                <div class="meta" id="gva-eu-meta"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        // - Local development: localhost:8000
+        // - Production: Set VITE_API_URL environment variable in Vercel
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8000/api/v1'
+            : 'RAILWAY_API_URL_PLACEHOLDER/api/v1';
+
+        async function fetchData(endpoint) {
+            const url = `${API_BASE}/data?${endpoint}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function prepareLineChartData(data, geoLabels) {
+            const byGeo = {};
+            data.forEach(row => {
+                if (!byGeo[row.geo]) {
+                    byGeo[row.geo] = [];
+                }
+                byGeo[row.geo].push({ time: row.time, value: row.value });
+            });
+
+            const years = [...new Set(data.map(r => r.time))].sort((a, b) => a - b);
+
+            const series = Object.keys(byGeo).map(geo => {
+                const geoData = byGeo[geo];
+                const values = years.map(year => {
+                    const point = geoData.find(d => d.time === year);
+                    return point ? point.value : null;
+                });
+                return {
+                    name: geoLabels[geo] || geo,
+                    type: 'line',
+                    data: values,
+                    smooth: true,
+                    lineStyle: { width: 3 },
+                    symbolSize: 8
+                };
+            });
+
+            return { years, series };
+        }
+
+        function prepareStackedAreaData(data, naceLabels) {
+            const byNace = {};
+            data.forEach(row => {
+                if (!byNace[row.nace]) {
+                    byNace[row.nace] = [];
+                }
+                byNace[row.nace].push({ time: row.time, value: row.value });
+            });
+
+            const years = [...new Set(data.map(r => r.time))].sort((a, b) => a - b);
+
+            // Order sectors for stacking
+            const sectorOrder = ['A', 'B-E', 'F', 'G-I', 'J', 'K', 'L', 'M_N', 'O-Q', 'R-U'];
+            const orderedSectors = sectorOrder.filter(s => byNace[s]);
+
+            const series = orderedSectors.map(nace => {
+                const naceData = byNace[nace];
+                const values = years.map(year => {
+                    const point = naceData.find(d => d.time === year);
+                    return point ? point.value : null;
+                });
+                return {
+                    name: naceLabels[nace] || nace,
+                    type: 'line',
+                    stack: 'Total',
+                    areaStyle: {},
+                    emphasis: { focus: 'series' },
+                    data: values
+                };
+            });
+
+            return { years, series };
+        }
+
+        const geoLabels = {
+            'BG': 'Bulgaria',
+            'EU27_2020': 'EU27'
+        };
+
+        const naceLabels = {
+            'A': 'Agriculture',
+            'B-E': 'Industry',
+            'F': 'Construction',
+            'G-I': 'Trade, Transport, Accommodation',
+            'J': 'ICT',
+            'K': 'Finance & Insurance',
+            'L': 'Real Estate',
+            'M_N': 'Professional Services',
+            'O-Q': 'Public Admin, Education, Health',
+            'R-U': 'Arts & Other Services'
+        };
+
+        const sectorColors = [
+            '#8B5A2B', // Agriculture - brown
+            '#4A5568', // Industry - gray
+            '#D69E2E', // Construction - yellow
+            '#3182CE', // Trade - blue
+            '#805AD5', // ICT - purple
+            '#38A169', // Finance - green
+            '#E53E3E', // Real Estate - red
+            '#DD6B20', // Professional - orange
+            '#319795', // Public Admin - teal
+            '#D53F8C'  // Arts - pink
+        ];
+
+        async function renderGDPChart() {
+            const chartDom = document.getElementById('gdp-chart');
+            const metaInfo = document.getElementById('gdp-meta');
+
+            try {
+                const result = await fetchData('dataset=sdg_08_10&geo=BG,EU27_2020&time=2010-2024');
+                const { years, series } = prepareLineChartData(result.data, geoLabels);
+
+                const chart = echarts.init(chartDom);
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: params => {
+                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
+                            params.forEach(p => {
+                                if (p.value !== null) {
+                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toLocaleString()}</strong><br/>`;
+                                }
+                            });
+                            return tip;
+                        }
+                    },
+                    legend: { data: series.map(s => s.name), bottom: 0 },
+                    grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
+                    xAxis: { type: 'category', data: years },
+                    yAxis: {
+                        type: 'value',
+                        name: 'EUR per capita',
+                        nameLocation: 'middle',
+                        nameGap: 60,
+                        min: value => Math.floor(value.min / 5000) * 5000
+                    },
+                    series: series,
+                    color: ['#3182ce', '#48bb78']
+                });
+                window.addEventListener('resize', () => chart.resize());
+                metaInfo.textContent = `Dataset: sdg_08_10 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
+            } catch (error) {
+                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function renderProductivityChart() {
+            const chartDom = document.getElementById('productivity-chart');
+            const metaInfo = document.getElementById('productivity-meta');
+
+            try {
+                const result = await fetchData('dataset=tipsna70&geo=BG,EU27_2020&time=2010-2024&unit=I15');
+                const { years, series } = prepareLineChartData(result.data, geoLabels);
+
+                const chart = echarts.init(chartDom);
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: params => {
+                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
+                            params.forEach(p => {
+                                if (p.value !== null) {
+                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toFixed(1)}</strong><br/>`;
+                                }
+                            });
+                            return tip;
+                        }
+                    },
+                    legend: { data: series.map(s => s.name), bottom: 0 },
+                    grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
+                    xAxis: { type: 'category', data: years },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Index (2015=100)',
+                        nameLocation: 'middle',
+                        nameGap: 50,
+                        min: value => Math.floor(value.min / 10) * 10
+                    },
+                    series: series,
+                    color: ['#3182ce', '#48bb78']
+                });
+                window.addEventListener('resize', () => chart.resize());
+                metaInfo.textContent = `Dataset: tipsna70 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
+            } catch (error) {
+                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function renderGVAChart(geo, chartId, metaId) {
+            const chartDom = document.getElementById(chartId);
+            const metaInfo = document.getElementById(metaId);
+
+            try {
+                const naces = 'A,B-E,F,G-I,J,K,L,M_N,O-Q,R-U';
+                const result = await fetchData(`dataset=nama_10_a10&geo=${geo}&time=2010-2024&unit=PC_GDP&na_item=B1G&nace_r2=${naces}`);
+                const { years, series } = prepareStackedAreaData(result.data, naceLabels);
+
+                const chart = echarts.init(chartDom);
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: { type: 'cross' },
+                        formatter: params => {
+                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
+                            let total = 0;
+                            params.forEach(p => {
+                                if (p.value !== null) {
+                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toFixed(1)}%</strong><br/>`;
+                                    total += p.value;
+                                }
+                            });
+                            tip += `<strong>Total: ${total.toFixed(1)}%</strong>`;
+                            return tip;
+                        }
+                    },
+                    legend: {
+                        data: series.map(s => s.name),
+                        bottom: 0,
+                        type: 'scroll',
+                        textStyle: { fontSize: 10 }
+                    },
+                    grid: { left: '3%', right: '4%', bottom: '18%', top: '5%', containLabel: true },
+                    xAxis: { type: 'category', data: years, boundaryGap: false },
+                    yAxis: {
+                        type: 'value',
+                        name: '% of GDP',
+                        nameLocation: 'middle',
+                        nameGap: 40,
+                        max: 100
+                    },
+                    series: series,
+                    color: sectorColors
+                });
+                window.addEventListener('resize', () => chart.resize());
+                metaInfo.textContent = `Dataset: nama_10_a10 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
+            } catch (error) {
+                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize all charts
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGDPChart();
+            renderProductivityChart();
+            renderGVAChart('BG', 'gva-bg-chart', 'gva-bg-meta');
+            renderGVAChart('EU27_2020', 'gva-eu-chart', 'gva-eu-meta');
+        });
+    </script>
+</body>
+</html>
