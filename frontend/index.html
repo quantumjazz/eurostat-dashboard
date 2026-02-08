@@ -15,20 +15,121 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             color: #333;
-            padding: 20px;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
-        h1 {
-            margin-bottom: 10px;
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 20px;
+            margin-bottom: 0;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
             color: #1a365d;
+            font-size: 22px;
+            padding: 16px 0;
         }
-        .subtitle {
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+        }
+        .nav-tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
             color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            text-decoration: none;
+            user-select: none;
+        }
+        .nav-tab:hover {
+            color: #1a365d;
+            background: #f7fafc;
+        }
+        .nav-tab.active {
+            color: #1a365d;
+            border-bottom-color: #3182ce;
+        }
+
+        /* Page sections */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* KPI Cards */
+        .kpi-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+        .kpi-section-subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-bottom: 30px;
         }
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .kpi-card-title {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .kpi-card-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a365d;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+        .kpi-card-comparison {
+            font-size: 13px;
+            color: #48bb78;
+            font-weight: 500;
+        }
+        .kpi-card-comparison.negative {
+            color: #e53e3e;
+        }
+        .kpi-card-description {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .kpi-loading {
+            font-size: 16px;
+            color: #a0aec0;
+        }
+
+        /* Chart containers */
         .chart-container {
             background: white;
             border-radius: 12px;
@@ -39,18 +140,56 @@
         .chart-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
             color: #2d3748;
+        }
+        .chart-subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
         }
         .chart {
             width: 100%;
             height: 450px;
+        }
+        .chart-sm {
+            width: 100%;
+            height: 350px;
+        }
+        .chart-lg {
+            width: 100%;
+            height: 520px;
+        }
+        .chart-xl {
+            width: 100%;
+            height: 620px;
         }
         .loading {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 450px;
+            color: #666;
+        }
+        .loading-sm {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 350px;
+            color: #666;
+        }
+        .loading-lg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 520px;
+            color: #666;
+        }
+        .loading-xl {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 620px;
             color: #666;
         }
         .error {
@@ -64,311 +203,1017 @@
             color: #888;
             margin-top: 10px;
         }
-        .charts-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+
         @media (max-width: 900px) {
-            .charts-row {
+            .kpi-grid {
                 grid-template-columns: 1fr;
+            }
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav-tab {
+                padding: 12px 16px;
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Eurostat Dashboard</h1>
-        <p class="subtitle">Economic indicators from the European Statistical Office</p>
-
-        <div class="chart-container">
-            <div class="chart-title">GDP per Capita (Chain linked volumes 2020, euro per capita)</div>
-            <div id="gdp-chart" class="chart">
-                <div class="loading">Loading data...</div>
+    <!-- Header with navigation -->
+    <div class="header">
+        <div class="header-inner">
+            <h1>Eurostat Dashboard</h1>
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-page="home">Home</div>
+                <div class="nav-tab" data-page="overview">Overview</div>
+                <div class="nav-tab" data-page="sdi">SDI-EU</div>
             </div>
-            <div class="meta" id="gdp-meta"></div>
         </div>
+    </div>
 
-        <div class="chart-container">
-            <div class="chart-title">Labour Productivity per Hour Worked (Index, 2015=100)</div>
-            <div id="productivity-chart" class="chart">
-                <div class="loading">Loading data...</div>
+    <!-- ==================== HOME PAGE (KPI cards + OECD) ==================== -->
+    <div id="home-page" class="page active">
+        <div class="container">
+            <div style="margin-bottom: 24px;">
+                <div class="kpi-section-title">Key Indicators — Bulgaria</div>
+                <div class="kpi-section-subtitle">Latest available data from the OECD Economic Outlook</div>
             </div>
-            <div class="meta" id="productivity-meta"></div>
-        </div>
 
-        <div class="charts-row">
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-card-title">GDP per Capita (PPP, USD)</div>
+                    <div class="kpi-card-value" id="kpi-gdp"><span class="kpi-loading">...</span></div>
+                    <div class="kpi-card-comparison" id="kpi-gdp-compare"></div>
+                    <div class="kpi-card-description">Purchasing power parity, constant prices</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-card-title">Unemployment Rate</div>
+                    <div class="kpi-card-value" id="kpi-unr"><span class="kpi-loading">...</span></div>
+                    <div class="kpi-card-comparison" id="kpi-unr-compare"></div>
+                    <div class="kpi-card-description">% of total labour force</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-card-title">Government Debt</div>
+                    <div class="kpi-card-value" id="kpi-debt"><span class="kpi-loading">...</span></div>
+                    <div class="kpi-card-comparison" id="kpi-debt-compare"></div>
+                    <div class="kpi-card-description">General government gross financial liabilities, % of GDP</div>
+                </div>
+            </div>
+
+            <!-- Country Comparison Bar Chart -->
             <div class="chart-container">
-                <div class="chart-title">GVA by Sector - Bulgaria (% of GDP)</div>
-                <div id="gva-bg-chart" class="chart">
+                <div class="chart-title">GDP per Capita Comparison (PPP, USD, 2024)</div>
+                <div id="comparison-chart" class="chart-sm">
+                    <div class="loading-sm">Loading data...</div>
+                </div>
+                <div class="meta" id="comparison-meta"></div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="chart-container">
+                <div class="chart-title">GDP per Capita Trend (2015–2025)</div>
+                <div id="trend-chart" class="chart">
                     <div class="loading">Loading data...</div>
                 </div>
-                <div class="meta" id="gva-bg-meta"></div>
+                <div class="meta" id="trend-meta"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- ==================== OVERVIEW PAGE (Sector bar charts) ==================== -->
+    <div id="overview-page" class="page">
+        <div class="container">
+            <!-- Economy: GVA by Sector -->
             <div class="chart-container">
-                <div class="chart-title">GVA by Sector - EU27 (% of GDP)</div>
-                <div id="gva-eu-chart" class="chart">
-                    <div class="loading">Loading data...</div>
+                <div class="chart-title">Economy — Gross Value Added by Sector</div>
+                <div class="chart-subtitle">Bulgaria vs EU27 Average (% of GDP, latest year)</div>
+                <div id="sector-chart" class="chart-lg">
+                    <div class="loading-lg">Loading data...</div>
                 </div>
-                <div class="meta" id="gva-eu-meta"></div>
+                <div class="meta" id="sector-meta"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SDI-EU PAGE (Sector Development Index) ==================== -->
+    <div id="sdi-page" class="page">
+        <div class="container">
+            <!-- Panel 1: SDI Overview (horizontal bar chart) -->
+            <div class="chart-container">
+                <div class="chart-title">SDI-EU — Sector Development Index</div>
+                <div class="chart-subtitle" id="sdi-overview-subtitle">Bulgaria relative to EU27 (EU27 = 100), latest year</div>
+                <div id="sdi-overview-chart" class="chart-lg">
+                    <div class="loading-lg">Loading SDI data...</div>
+                </div>
+                <div class="meta" id="sdi-overview-meta"></div>
+            </div>
+
+            <!-- Panel 2: Pillar Decomposition (grouped bar chart) -->
+            <div class="chart-container">
+                <div class="chart-title">Pillar Decomposition</div>
+                <div class="chart-subtitle" id="sdi-pillar-subtitle">Labour Productivity | Compensation per Employee | Investment Intensity (EU27 = 100)</div>
+                <div id="sdi-heatmap" class="chart-xl">
+                    <div class="loading-xl">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Convergence Over Time (line chart) -->
+            <div class="chart-container">
+                <div class="chart-title">Convergence Over Time</div>
+                <div class="chart-subtitle" id="sdi-trend-subtitle">SDI composite trend by sector (click a sector above to highlight)</div>
+                <div id="sdi-trend-chart" class="chart-lg">
+                    <div class="loading-lg">Loading...</div>
+                </div>
+                <div class="meta" id="sdi-trend-meta"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // API Configuration
-        // - Local development: localhost:8000
-        // - Production: Set VITE_API_URL environment variable in Vercel
+        // ==================== CONFIG ====================
         const API_BASE = window.location.hostname === 'localhost'
             ? 'http://localhost:8000/api/v1'
             : 'https://eurostat-dashboard-production.up.railway.app/api/v1';
 
+        // Track which pages have been initialized
+        const pageInitialized = { home: false, overview: false, sdi: false };
+
+        // Track all chart instances for resize
+        const allCharts = [];
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const page = tab.dataset.page;
+                // Update tab styles
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // Show/hide pages
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(`${page}-page`).classList.add('active');
+                // Initialize page content on first visit
+                if (!pageInitialized[page]) {
+                    pageInitialized[page] = true;
+                    if (page === 'overview') initOverviewPage();
+                    if (page === 'sdi') initSDIPage();
+                }
+                // Resize charts when switching tabs (they may have been hidden)
+                setTimeout(() => allCharts.forEach(c => c.resize()), 50);
+            });
+        });
+
+        // ==================== FETCH HELPERS ====================
         async function fetchData(endpoint) {
             const url = `${API_BASE}/data?${endpoint}`;
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
             return response.json();
         }
 
-        function prepareLineChartData(data, geoLabels) {
-            const byGeo = {};
-            data.forEach(row => {
-                if (!byGeo[row.geo]) {
-                    byGeo[row.geo] = [];
+        async function fetchOECDData(params) {
+            const url = `${API_BASE}/oecd?${params}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            return response.json();
+        }
+
+        // ==================== OECD COUNTRY CONFIG ====================
+        const oecdCountries = 'BGR,USA,GBR,JPN,KOR,CAN,AUS,OECD';
+        const oecdGeoLabels = {
+            'BGR': 'Bulgaria',
+            'USA': 'United States',
+            'GBR': 'United Kingdom',
+            'JPN': 'Japan',
+            'KOR': 'South Korea',
+            'CAN': 'Canada',
+            'AUS': 'Australia',
+            'OECD': 'OECD Average'
+        };
+        const oecdGeoColors = {
+            'BGR': '#e53e3e',
+            'USA': '#3182ce',
+            'GBR': '#805AD5',
+            'JPN': '#DD6B20',
+            'KOR': '#38A169',
+            'CAN': '#D69E2E',
+            'AUS': '#319795',
+            'OECD': '#718096'
+        };
+
+        // ==================== HOME PAGE (OECD KPIs) ====================
+        async function initHomePage() {
+            try {
+                const result = await fetchOECDData(
+                    `measures=GDPVD_CAP,UNR,GGFLQ&geo=${oecdCountries}&time=2015-2026`
+                );
+                const data = result.data;
+
+                renderKPICards(data);
+                renderComparisonChart(data);
+                renderTrendChart(data);
+            } catch (error) {
+                console.error('Home page error:', error);
+                document.getElementById('kpi-gdp').innerHTML = `<span style="font-size:16px;color:#e53e3e;">Error loading data</span>`;
+            }
+        }
+
+        function getLatestValue(data, geo, measure) {
+            const matching = data
+                .filter(r => r.geo === geo && r.measure === measure)
+                .sort((a, b) => b.time - a.time);
+            return matching.length > 0 ? matching[0] : null;
+        }
+
+        function renderKPICards(data) {
+            // GDP per capita
+            const bgGdp = getLatestValue(data, 'BGR', 'GDPVD_CAP');
+            const oecdGdp = getLatestValue(data, 'OECD', 'GDPVD_CAP');
+            if (bgGdp) {
+                document.getElementById('kpi-gdp').textContent = `$${Math.round(bgGdp.value).toLocaleString()}`;
+                if (oecdGdp) {
+                    const pct = ((bgGdp.value / oecdGdp.value) * 100).toFixed(0);
+                    document.getElementById('kpi-gdp-compare').textContent = `${pct}% of OECD avg ($${Math.round(oecdGdp.value).toLocaleString()})`;
+                    document.getElementById('kpi-gdp-compare').className = 'kpi-card-comparison' + (bgGdp.value < oecdGdp.value ? ' negative' : '');
                 }
-                byGeo[row.geo].push({ time: row.time, value: row.value });
+            }
+
+            // Unemployment
+            const bgUnr = getLatestValue(data, 'BGR', 'UNR');
+            const oecdUnr = getLatestValue(data, 'OECD', 'UNR');
+            if (bgUnr) {
+                document.getElementById('kpi-unr').textContent = `${bgUnr.value.toFixed(1)}%`;
+                if (oecdUnr) {
+                    const diff = bgUnr.value - oecdUnr.value;
+                    const sign = diff > 0 ? '+' : '';
+                    document.getElementById('kpi-unr-compare').textContent = `${sign}${diff.toFixed(1)}pp vs OECD avg (${oecdUnr.value.toFixed(1)}%)`;
+                    document.getElementById('kpi-unr-compare').className = 'kpi-card-comparison' + (diff > 0 ? ' negative' : '');
+                }
+            }
+
+            // Government debt
+            const bgDebt = getLatestValue(data, 'BGR', 'GGFLQ');
+            const oecdDebt = getLatestValue(data, 'OECD', 'GGFLQ');
+            if (bgDebt) {
+                document.getElementById('kpi-debt').textContent = `${bgDebt.value.toFixed(1)}%`;
+                if (oecdDebt) {
+                    const diff = bgDebt.value - oecdDebt.value;
+                    const sign = diff > 0 ? '+' : '';
+                    document.getElementById('kpi-debt-compare').textContent = `${sign}${diff.toFixed(1)}pp vs OECD avg (${oecdDebt.value.toFixed(1)}%)`;
+                    document.getElementById('kpi-debt-compare').className = 'kpi-card-comparison' + (diff > 0 ? ' negative' : '');
+                }
+            }
+        }
+
+        function renderComparisonChart(data) {
+            const chartDom = document.getElementById('comparison-chart');
+
+            const countryOrder = ['USA', 'KOR', 'OECD', 'GBR', 'CAN', 'AUS', 'JPN', 'BGR'];
+            const gdpData = countryOrder.map(geo => {
+                const latest = getLatestValue(data, geo, 'GDPVD_CAP');
+                return {
+                    geo,
+                    name: oecdGeoLabels[geo] || geo,
+                    value: latest ? Math.round(latest.value) : 0,
+                    color: oecdGeoColors[geo]
+                };
+            }).sort((a, b) => a.value - b.value);
+
+            const chart = echarts.init(chartDom);
+            allCharts.push(chart);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: params => {
+                        const p = params[0];
+                        return `<strong>${p.name}</strong><br/>GDP per capita: <strong>$${p.value.toLocaleString()}</strong>`;
+                    }
+                },
+                grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    axisLabel: { formatter: val => `$${(val / 1000).toFixed(0)}K` }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: gdpData.map(d => d.name),
+                    axisLabel: { fontSize: 13 }
+                },
+                series: [{
+                    type: 'bar',
+                    data: gdpData.map(d => ({
+                        value: d.value,
+                        itemStyle: { color: d.color, borderRadius: [0, 4, 4, 0] }
+                    })),
+                    barWidth: '60%',
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: p => `$${p.value.toLocaleString()}`,
+                        fontSize: 12,
+                        color: '#4a5568'
+                    }
+                }]
             });
 
-            const years = [...new Set(data.map(r => r.time))].sort((a, b) => a - b);
+            window.addEventListener('resize', () => chart.resize());
+            document.getElementById('comparison-meta').textContent = `Dataset: OECD Economic Outlook (DSD_EO) | Source: OECD`;
+        }
 
-            const series = Object.keys(byGeo).map(geo => {
-                const geoData = byGeo[geo];
-                const values = years.map(year => {
-                    const point = geoData.find(d => d.time === year);
-                    return point ? point.value : null;
+        function renderTrendChart(data) {
+            const chartDom = document.getElementById('trend-chart');
+            const gdpData = data.filter(r => r.measure === 'GDPVD_CAP');
+            const years = [...new Set(gdpData.map(r => r.time))].sort((a, b) => a - b);
+            const geoOrder = ['USA', 'KOR', 'OECD', 'GBR', 'CAN', 'AUS', 'JPN', 'BGR'];
+
+            const series = geoOrder.map(geo => {
+                const geoRows = gdpData.filter(r => r.geo === geo);
+                const values = years.map(y => {
+                    const row = geoRows.find(r => r.time === y);
+                    return row ? Math.round(row.value) : null;
                 });
                 return {
-                    name: geoLabels[geo] || geo,
+                    name: oecdGeoLabels[geo] || geo,
                     type: 'line',
                     data: values,
                     smooth: true,
-                    lineStyle: { width: 3 },
-                    symbolSize: 8
+                    lineStyle: {
+                        width: geo === 'BGR' ? 4 : 2,
+                        type: geo === 'OECD' ? 'dashed' : 'solid'
+                    },
+                    symbolSize: geo === 'BGR' ? 8 : 4,
+                    itemStyle: { color: oecdGeoColors[geo] },
+                    emphasis: { focus: 'series' }
                 };
             });
 
-            return { years, series };
-        }
+            const chart = echarts.init(chartDom);
+            allCharts.push(chart);
 
-        function prepareStackedAreaData(data, naceLabels) {
-            const byNace = {};
-            data.forEach(row => {
-                if (!byNace[row.nace]) {
-                    byNace[row.nace] = [];
-                }
-                byNace[row.nace].push({ time: row.time, value: row.value });
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: params => {
+                        let tip = `<strong>${params[0].axisValue}</strong><br/>`;
+                        params.sort((a, b) => (b.value || 0) - (a.value || 0));
+                        params.forEach(p => {
+                            if (p.value !== null) {
+                                tip += `${p.marker} ${p.seriesName}: <strong>$${p.value.toLocaleString()}</strong><br/>`;
+                            }
+                        });
+                        return tip;
+                    }
+                },
+                legend: { data: series.map(s => s.name), bottom: 0, type: 'scroll' },
+                grid: { left: '3%', right: '4%', bottom: '14%', containLabel: true },
+                xAxis: { type: 'category', data: years },
+                yAxis: {
+                    type: 'value',
+                    name: 'USD per capita (PPP)',
+                    nameLocation: 'middle',
+                    nameGap: 65,
+                    axisLabel: { formatter: val => `$${(val / 1000).toFixed(0)}K` }
+                },
+                series: series
             });
 
-            const years = [...new Set(data.map(r => r.time))].sort((a, b) => a - b);
-
-            // Order sectors for stacking
-            const sectorOrder = ['A', 'B-E', 'F', 'G-I', 'J', 'K', 'L', 'M_N', 'O-Q', 'R-U'];
-            const orderedSectors = sectorOrder.filter(s => byNace[s]);
-
-            const series = orderedSectors.map(nace => {
-                const naceData = byNace[nace];
-                const values = years.map(year => {
-                    const point = naceData.find(d => d.time === year);
-                    return point ? point.value : null;
-                });
-                return {
-                    name: naceLabels[nace] || nace,
-                    type: 'line',
-                    stack: 'Total',
-                    areaStyle: {},
-                    emphasis: { focus: 'series' },
-                    data: values
-                };
-            });
-
-            return { years, series };
+            window.addEventListener('resize', () => chart.resize());
+            document.getElementById('trend-meta').textContent = `Dataset: OECD Economic Outlook (DSD_EO) | Source: OECD`;
         }
 
-        const geoLabels = {
-            'BG': 'Bulgaria',
-            'EU27_2020': 'EU27'
-        };
-
+        // ==================== OVERVIEW PAGE (Eurostat Sector Charts) ====================
         const naceLabels = {
             'A': 'Agriculture',
             'B-E': 'Industry',
             'F': 'Construction',
-            'G-I': 'Trade, Transport, Accommodation',
+            'G-I': 'Trade & Transport',
             'J': 'ICT',
-            'K': 'Finance & Insurance',
+            'K': 'Finance',
             'L': 'Real Estate',
-            'M_N': 'Professional Services',
-            'O-Q': 'Public Admin, Education, Health',
-            'R-U': 'Arts & Other Services'
+            'M_N': 'Professional Svcs',
+            'O-Q': 'Public Admin',
+            'R-U': 'Arts & Other'
+        };
+        const sectorOrder = ['A', 'B-E', 'F', 'G-I', 'J', 'K', 'L', 'M_N', 'O-Q', 'R-U'];
+
+        async function initOverviewPage() {
+            try {
+                await renderSectorBarChart();
+            } catch (error) {
+                console.error('Overview page error:', error);
+                document.getElementById('sector-chart').innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+            }
+        }
+
+        async function renderSectorBarChart() {
+            const chartDom = document.getElementById('sector-chart');
+            const metaInfo = document.getElementById('sector-meta');
+
+            const naces = sectorOrder.join(',');
+            const result = await fetchData(
+                `dataset=nama_10_a10&geo=BG,EU27_2020&time=2020-2024&unit=PC_GDP&na_item=B1G&nace_r2=${naces}`
+            );
+            const data = result.data;
+
+            // Find the latest year that has data for both geos
+            const bgYears = new Set(data.filter(r => r.geo === 'BG').map(r => r.time));
+            const euYears = new Set(data.filter(r => r.geo === 'EU27_2020').map(r => r.time));
+            const commonYears = [...bgYears].filter(y => euYears.has(y)).sort((a, b) => b - a);
+            const latestYear = commonYears[0] || 2024;
+
+            // Extract latest-year values by sector
+            const latestData = data.filter(r => r.time === latestYear);
+            const bgValues = {};
+            const euValues = {};
+            latestData.forEach(r => {
+                if (r.geo === 'BG') bgValues[r.nace] = r.value;
+                if (r.geo === 'EU27_2020') euValues[r.nace] = r.value;
+            });
+
+            const categories = sectorOrder.map(code => naceLabels[code] || code);
+            const bgSeries = sectorOrder.map(code => bgValues[code] != null ? parseFloat(bgValues[code].toFixed(1)) : 0);
+            const euSeries = sectorOrder.map(code => euValues[code] != null ? parseFloat(euValues[code].toFixed(1)) : 0);
+
+            const chart = echarts.init(chartDom);
+            allCharts.push(chart);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: params => {
+                        const bg = params.find(p => p.seriesName === 'Bulgaria');
+                        const eu = params.find(p => p.seriesName === 'EU27 Average');
+                        let tip = `<strong>${params[0].name}</strong><br/>`;
+                        if (bg) tip += `${bg.marker} Bulgaria: <strong>${bg.value}%</strong><br/>`;
+                        if (eu) tip += `${eu.marker} EU27 Average: <strong>${eu.value}%</strong><br/>`;
+                        if (bg && eu) {
+                            const diff = (bg.value - eu.value).toFixed(1);
+                            const sign = diff > 0 ? '+' : '';
+                            const color = diff > 0 ? '#38A169' : '#e53e3e';
+                            tip += `<span style="color:${color}">Difference: <strong>${sign}${diff}pp</strong></span>`;
+                        }
+                        return tip;
+                    }
+                },
+                legend: {
+                    data: ['Bulgaria', 'EU27 Average'],
+                    bottom: 0
+                },
+                grid: { left: '3%', right: '4%', bottom: '10%', top: '5%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisLabel: {
+                        rotate: 35,
+                        fontSize: 11,
+                        interval: 0
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '% of GDP',
+                    nameLocation: 'middle',
+                    nameGap: 40,
+                    axisLabel: { formatter: '{value}%' }
+                },
+                series: [
+                    {
+                        name: 'Bulgaria',
+                        type: 'bar',
+                        data: bgSeries,
+                        itemStyle: {
+                            color: '#3182CE',
+                            borderRadius: [4, 4, 0, 0]
+                        },
+                        barGap: '20%',
+                        label: {
+                            show: true,
+                            position: 'top',
+                            fontSize: 10,
+                            color: '#3182CE',
+                            formatter: p => `${p.value}%`
+                        }
+                    },
+                    {
+                        name: 'EU27 Average',
+                        type: 'bar',
+                        data: euSeries,
+                        itemStyle: {
+                            color: '#CBD5E0',
+                            borderColor: '#A0AEC0',
+                            borderWidth: 1,
+                            borderType: 'dashed',
+                            borderRadius: [4, 4, 0, 0]
+                        },
+                        label: {
+                            show: true,
+                            position: 'top',
+                            fontSize: 10,
+                            color: '#718096',
+                            formatter: p => `${p.value}%`
+                        }
+                    }
+                ]
+            });
+
+            window.addEventListener('resize', () => chart.resize());
+
+            // Update title with actual year and meta
+            const titleEl = chartDom.closest('.chart-container').querySelector('.chart-subtitle');
+            if (titleEl) titleEl.textContent = `Bulgaria vs EU27 Average (% of GDP, ${latestYear})`;
+            metaInfo.textContent = `Dataset: nama_10_a10 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
+        }
+
+        // ==================== SDI-EU PAGE ====================
+        // SDI color bands: value -> color
+        function sdiColor(value) {
+            if (value == null) return '#CBD5E0';
+            if (value < 80) return '#E53E3E';
+            if (value < 95) return '#ED8936';
+            if (value < 105) return '#48BB78';
+            if (value < 120) return '#3182CE';
+            return '#1A365D';
+        }
+        function sdiBandLabel(value) {
+            if (value == null) return 'N/A';
+            if (value < 80) return 'Significantly below EU';
+            if (value < 95) return 'Below EU';
+            if (value < 105) return 'At EU level';
+            if (value < 120) return 'Above EU';
+            return 'Significantly above EU';
+        }
+
+        // Sector colors for trend chart
+        const sectorColors = {
+            'A': '#E53E3E', 'B-E': '#DD6B20', 'F': '#D69E2E',
+            'G-I': '#38A169', 'J': '#319795', 'K': '#3182CE',
+            'L': '#805AD5', 'M_N': '#D53F8C', 'O-Q': '#718096',
+            'R-U': '#975A16'
         };
 
-        const sectorColors = [
-            '#8B5A2B', // Agriculture - brown
-            '#4A5568', // Industry - gray
-            '#D69E2E', // Construction - yellow
-            '#3182CE', // Trade - blue
-            '#805AD5', // ICT - purple
-            '#38A169', // Finance - green
-            '#E53E3E', // Real Estate - red
-            '#DD6B20', // Professional - orange
-            '#319795', // Public Admin - teal
-            '#D53F8C'  // Arts - pink
-        ];
+        // Cross-panel state
+        let selectedSector = null;
+        let sdiOverviewChart = null;
+        let sdiHeatmapChart = null;
+        let sdiTrendChart = null;
+        let sdiAllData = null;
 
-        async function renderGDPChart() {
-            const chartDom = document.getElementById('gdp-chart');
-            const metaInfo = document.getElementById('gdp-meta');
-
+        async function initSDIPage() {
             try {
-                const result = await fetchData('dataset=sdg_08_10&geo=BG,EU27_2020&time=2010-2024');
-                const { years, series } = prepareLineChartData(result.data, geoLabels);
+                const response = await fetch(`${API_BASE}/sdi?time=2015-2023`);
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+                const result = await response.json();
+                sdiAllData = result.data;
 
-                const chart = echarts.init(chartDom);
-                chart.setOption({
-                    tooltip: {
-                        trigger: 'axis',
-                        formatter: params => {
-                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
-                            params.forEach(p => {
-                                if (p.value !== null) {
-                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toLocaleString()}</strong><br/>`;
-                                }
-                            });
-                            return tip;
-                        }
-                    },
-                    legend: { data: series.map(s => s.name), bottom: 0 },
-                    grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
-                    xAxis: { type: 'category', data: years },
-                    yAxis: {
-                        type: 'value',
-                        name: 'EUR per capita',
-                        nameLocation: 'middle',
-                        nameGap: 60,
-                        min: value => Math.floor(value.min / 5000) * 5000
-                    },
-                    series: series,
-                    color: ['#3182ce', '#48bb78']
-                });
-                window.addEventListener('resize', () => chart.resize());
-                metaInfo.textContent = `Dataset: sdg_08_10 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
+                renderSDIOverviewChart(sdiAllData);
+                renderSDIHeatmap(sdiAllData);
+                renderSDITrendChart(sdiAllData);
+
+                document.getElementById('sdi-overview-meta').textContent =
+                    `Datasets: nama_10_a10, nama_10_a10_e, nama_10_a64_p5 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
             } catch (error) {
-                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                console.error('SDI page error:', error);
+                document.getElementById('sdi-overview-chart').innerHTML =
+                    `<div class="error">Error loading SDI data: ${error.message}</div>`;
             }
         }
 
-        async function renderProductivityChart() {
-            const chartDom = document.getElementById('productivity-chart');
-            const metaInfo = document.getElementById('productivity-meta');
+        function onSectorClick(naceCode) {
+            if (selectedSector === naceCode) {
+                selectedSector = null; // Deselect
+            } else {
+                selectedSector = naceCode;
+            }
+            // Update all panels
+            if (sdiOverviewChart) highlightOverviewBar();
+            if (sdiHeatmapChart) highlightHeatmapRow();
+            if (sdiTrendChart) highlightTrendLine();
+        }
 
-            try {
-                const result = await fetchData('dataset=tipsna70&geo=BG,EU27_2020&time=2010-2024&unit=I15');
-                const { years, series } = prepareLineChartData(result.data, geoLabels);
+        // ---- Panel 1: SDI Overview (Horizontal Bar Chart) ----
+        function renderSDIOverviewChart(data) {
+            const chartDom = document.getElementById('sdi-overview-chart');
 
-                const chart = echarts.init(chartDom);
-                chart.setOption({
-                    tooltip: {
-                        trigger: 'axis',
-                        formatter: params => {
-                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
-                            params.forEach(p => {
-                                if (p.value !== null) {
-                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toFixed(1)}</strong><br/>`;
-                                }
-                            });
-                            return tip;
+            // Get latest year
+            const latestYear = Math.max(...data.map(d => d.time));
+            const latestData = data.filter(d => d.time === latestYear);
+
+            // Sort by SDI value (ascending → lowest at top for horizontal bar)
+            latestData.sort((a, b) => a.sdi - b.sdi);
+
+            const categories = latestData.map(d => d.nace_label);
+            const values = latestData.map(d => d.sdi);
+            const naces = latestData.map(d => d.nace);
+
+            const chart = echarts.init(chartDom);
+            sdiOverviewChart = chart;
+            allCharts.push(chart);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: params => {
+                        const p = params[0];
+                        const idx = p.dataIndex;
+                        const d = latestData[idx];
+                        let tip = `<strong>${d.nace_label}</strong> (${d.nace})<br/>`;
+                        tip += `SDI Composite: <strong>${d.sdi}</strong><br/>`;
+                        tip += `<span style="color:#718096">LP: ${d.lp} | Comp: ${d.comp} | Inv: ${d.inv != null ? d.inv : 'N/A'}</span><br/>`;
+                        tip += `<span style="color:${sdiColor(d.sdi)}">${sdiBandLabel(d.sdi)}</span>`;
+                        return tip;
+                    }
+                },
+                grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    name: 'SDI Score',
+                    axisLabel: { formatter: '{value}' },
+                    max: function(value) { return Math.max(value.max + 10, 110); }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisLabel: { fontSize: 12 }
+                },
+                series: [{
+                    type: 'bar',
+                    data: values.map((v, i) => ({
+                        value: v,
+                        itemStyle: {
+                            color: sdiColor(v),
+                            borderRadius: [0, 4, 4, 0]
                         }
+                    })),
+                    barWidth: '65%',
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: p => p.value.toFixed(1),
+                        fontSize: 12,
+                        color: '#4a5568'
                     },
-                    legend: { data: series.map(s => s.name), bottom: 0 },
-                    grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
-                    xAxis: { type: 'category', data: years },
-                    yAxis: {
-                        type: 'value',
-                        name: 'Index (2015=100)',
-                        nameLocation: 'middle',
-                        nameGap: 50,
-                        min: value => Math.floor(value.min / 10) * 10
+                    // Mark line at EU = 100
+                    markLine: {
+                        silent: true,
+                        symbol: 'none',
+                        lineStyle: { type: 'dashed', color: '#A0AEC0', width: 2 },
+                        label: {
+                            formatter: 'EU27 = 100',
+                            position: 'end',
+                            color: '#718096',
+                            fontSize: 11
+                        },
+                        data: [{ xAxis: 100 }]
+                    }
+                }]
+            });
+
+            // Click handler
+            chart.on('click', function(params) {
+                if (params.componentType === 'series') {
+                    onSectorClick(naces[params.dataIndex]);
+                }
+            });
+
+            window.addEventListener('resize', () => chart.resize());
+
+            // Update subtitle with year
+            document.getElementById('sdi-overview-subtitle').textContent =
+                `Bulgaria relative to EU27 (EU27 = 100), ${latestYear}`;
+        }
+
+        function highlightOverviewBar() {
+            if (!sdiOverviewChart || !sdiAllData) return;
+            const latestYear = Math.max(...sdiAllData.map(d => d.time));
+            const latestData = sdiAllData.filter(d => d.time === latestYear)
+                .sort((a, b) => a.sdi - b.sdi);
+
+            const values = latestData.map((d, i) => ({
+                value: d.sdi,
+                itemStyle: {
+                    color: sdiColor(d.sdi),
+                    borderRadius: [0, 4, 4, 0],
+                    opacity: selectedSector ? (d.nace === selectedSector ? 1 : 0.3) : 1
+                }
+            }));
+
+            sdiOverviewChart.setOption({
+                series: [{ data: values }]
+            });
+        }
+
+        // ---- Panel 2: Pillar Decomposition (Grouped Horizontal Bar Chart) ----
+        const pillarColors = {
+            lp: '#6366F1',   // indigo
+            comp: '#0891B2', // cyan
+            inv: '#D97706'   // amber
+        };
+
+        function renderSDIHeatmap(data) {
+            const chartDom = document.getElementById('sdi-heatmap');
+            const latestYear = Math.max(...data.map(d => d.time));
+            const latestData = data.filter(d => d.time === latestYear);
+
+            // Sort by SDI ascending (same as Panel 1)
+            latestData.sort((a, b) => a.sdi - b.sdi);
+
+            const sectors = latestData.map(d => d.nace_label);
+            const naces = latestData.map(d => d.nace);
+
+            const chart = echarts.init(chartDom);
+            sdiHeatmapChart = chart;
+            allCharts.push(chart);
+
+            function buildPillarSeries(pillarKey, pillarName, color) {
+                return {
+                    name: pillarName,
+                    type: 'bar',
+                    itemStyle: { color: color },
+                    data: latestData.map(d => {
+                        const val = d[pillarKey];
+                        const exceeds = val != null && val > 200;
+                        return {
+                            value: val != null ? val : 0,
+                            itemStyle: {
+                                color: color,
+                                borderRadius: [0, 3, 3, 0]
+                            },
+                            label: {
+                                position: exceeds ? 'insideRight' : 'right',
+                                color: exceeds ? '#fff' : '#4a5568'
+                            }
+                        };
+                    }),
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: p => p.value > 0 ? p.value.toFixed(0) : 'N/A',
+                        fontSize: 10,
+                        color: '#4a5568'
                     },
-                    series: series,
-                    color: ['#3182ce', '#48bb78']
+                    barGap: '15%'
+                };
+            }
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: params => {
+                        const idx = params[0].dataIndex;
+                        const d = latestData[idx];
+                        let tip = `<strong>${d.nace_label}</strong> (${d.nace})<br/>`;
+                        tip += `<span style="color:${pillarColors.lp}">\u25CF</span> Labour Productivity: <strong>${d.lp}</strong> <span style="color:${sdiColor(d.lp)}">${sdiBandLabel(d.lp)}</span><br/>`;
+                        tip += `<span style="color:${pillarColors.comp}">\u25CF</span> Compensation: <strong>${d.comp}</strong> <span style="color:${sdiColor(d.comp)}">${sdiBandLabel(d.comp)}</span><br/>`;
+                        const invStr = d.inv != null ? `${d.inv}` : 'N/A';
+                        const invBand = d.inv != null ? sdiBandLabel(d.inv) : '';
+                        tip += `<span style="color:${pillarColors.inv}">\u25CF</span> Investment: <strong>${invStr}</strong> <span style="color:${sdiColor(d.inv)}">${invBand}</span><br/>`;
+                        tip += `<hr style="margin:4px 0;border-color:#e2e8f0"/>SDI Composite: <strong>${d.sdi}</strong>`;
+                        return tip;
+                    }
+                },
+                legend: {
+                    data: ['Labour Productivity', 'Compensation per Employee', 'Investment Intensity'],
+                    bottom: 0,
+                    textStyle: { fontSize: 11 }
+                },
+                grid: { left: '3%', right: '10%', bottom: '8%', top: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    name: 'Index (EU27 = 100)',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    axisLabel: { formatter: '{value}' },
+                    // Clamp display but allow overflow for outliers like Construction INV
+                    max: function(value) { return Math.min(Math.max(value.max + 20, 120), 250); }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: sectors,
+                    axisLabel: { fontSize: 12 }
+                },
+                series: [
+                    buildPillarSeries('lp', 'Labour Productivity', pillarColors.lp),
+                    buildPillarSeries('comp', 'Compensation per Employee', pillarColors.comp),
+                    buildPillarSeries('inv', 'Investment Intensity', pillarColors.inv),
+                ],
+                // Reference line at 100
+            });
+
+            // Add mark line on first series
+            chart.setOption({
+                series: [{
+                    markLine: {
+                        silent: true,
+                        symbol: 'none',
+                        lineStyle: { type: 'dashed', color: '#718096', width: 1.5 },
+                        label: {
+                            formatter: 'EU27 = 100',
+                            position: 'end',
+                            color: '#718096',
+                            fontSize: 10
+                        },
+                        data: [{ xAxis: 100 }]
+                    }
+                }]
+            });
+
+            // Click handler
+            chart.on('click', function(params) {
+                if (params.componentType === 'series') {
+                    onSectorClick(naces[params.dataIndex]);
+                }
+            });
+
+            window.addEventListener('resize', () => chart.resize());
+
+            // Update subtitle with year
+            document.getElementById('sdi-pillar-subtitle').textContent =
+                `Three pillars by sector (EU27 = 100), ${latestYear}`;
+        }
+
+        function highlightHeatmapRow() {
+            if (!sdiHeatmapChart || !sdiAllData) return;
+            const latestYear = Math.max(...sdiAllData.map(d => d.time));
+            const latestData = sdiAllData.filter(d => d.time === latestYear)
+                .sort((a, b) => a.sdi - b.sdi);
+
+            function buildHighlightSeries(pillarKey, pillarName, color) {
+                return {
+                    name: pillarName,
+                    type: 'bar',
+                    data: latestData.map(d => {
+                        const val = d[pillarKey];
+                        const isSelected = selectedSector ? d.nace === selectedSector : true;
+                        return {
+                            value: val != null ? val : 0,
+                            itemStyle: {
+                                color: color,
+                                borderRadius: [0, 3, 3, 0],
+                                opacity: isSelected ? 1 : 0.2
+                            }
+                        };
+                    })
+                };
+            }
+
+            sdiHeatmapChart.setOption({
+                series: [
+                    buildHighlightSeries('lp', 'Labour Productivity', pillarColors.lp),
+                    buildHighlightSeries('comp', 'Compensation per Employee', pillarColors.comp),
+                    buildHighlightSeries('inv', 'Investment Intensity', pillarColors.inv),
+                ]
+            });
+        }
+
+        // ---- Panel 3: Convergence Over Time (Line Chart) ----
+        function renderSDITrendChart(data) {
+            const chartDom = document.getElementById('sdi-trend-chart');
+            const years = [...new Set(data.map(d => d.time))].sort((a, b) => a - b);
+
+            const series = sectorOrder.map(nace => {
+                const sectorData = data.filter(d => d.nace === nace);
+                const values = years.map(y => {
+                    const row = sectorData.find(d => d.time === y);
+                    return row ? row.sdi : null;
                 });
-                window.addEventListener('resize', () => chart.resize());
-                metaInfo.textContent = `Dataset: tipsna70 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
-            } catch (error) {
-                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                return {
+                    name: naceLabels[nace] || nace,
+                    type: 'line',
+                    data: values,
+                    smooth: true,
+                    lineStyle: { width: 2 },
+                    symbolSize: 5,
+                    itemStyle: { color: sectorColors[nace] },
+                    emphasis: { focus: 'series' }
+                };
+            });
+
+            const chart = echarts.init(chartDom);
+            sdiTrendChart = chart;
+            allCharts.push(chart);
+
+            chart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: params => {
+                        let tip = `<strong>${params[0].axisValue}</strong><br/>`;
+                        params.sort((a, b) => (b.value || 0) - (a.value || 0));
+                        params.forEach(p => {
+                            if (p.value !== null && p.value !== undefined) {
+                                const color = sdiColor(p.value);
+                                tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toFixed(1)}</strong><br/>`;
+                            }
+                        });
+                        return tip;
+                    }
+                },
+                legend: {
+                    data: series.map(s => s.name),
+                    bottom: 0,
+                    type: 'scroll'
+                },
+                grid: { left: '3%', right: '4%', bottom: '14%', top: '5%', containLabel: true },
+                xAxis: { type: 'category', data: years },
+                yAxis: {
+                    type: 'value',
+                    name: 'SDI Score',
+                    nameLocation: 'middle',
+                    nameGap: 45,
+                    axisLabel: { formatter: '{value}' }
+                },
+                series: [
+                    ...series,
+                    {
+                        // Reference line at EU = 100
+                        type: 'line',
+                        name: 'EU27 = 100',
+                        data: years.map(() => 100),
+                        lineStyle: { type: 'dashed', color: '#A0AEC0', width: 2 },
+                        symbol: 'none',
+                        itemStyle: { color: '#A0AEC0' },
+                        tooltip: { show: false }
+                    }
+                ]
+            });
+
+            // Click handler for legend
+            chart.on('legendselectchanged', function(params) {
+                // Find the nace code for the toggled series
+                const toggledName = params.name;
+                const nace = Object.entries(naceLabels).find(([k, v]) => v === toggledName);
+                if (nace) {
+                    // Don't override legend behavior, just update cross-panel
+                }
+            });
+
+            window.addEventListener('resize', () => chart.resize());
+            document.getElementById('sdi-trend-meta').textContent =
+                `Methodology: SDI = (LP × Comp × Inv)^(1/3), where each pillar = BG/EU × 100`;
+        }
+
+        function highlightTrendLine() {
+            if (!sdiTrendChart || !sdiAllData) return;
+            const years = [...new Set(sdiAllData.map(d => d.time))].sort((a, b) => a - b);
+
+            const series = sectorOrder.map(nace => {
+                const sectorData = sdiAllData.filter(d => d.nace === nace);
+                const values = years.map(y => {
+                    const row = sectorData.find(d => d.time === y);
+                    return row ? row.sdi : null;
+                });
+                const isHighlighted = !selectedSector || nace === selectedSector;
+                return {
+                    name: naceLabels[nace] || nace,
+                    type: 'line',
+                    data: values,
+                    smooth: true,
+                    lineStyle: {
+                        width: isHighlighted ? (nace === selectedSector ? 4 : 2) : 1,
+                        opacity: isHighlighted ? 1 : 0.15
+                    },
+                    symbolSize: isHighlighted ? (nace === selectedSector ? 8 : 5) : 0,
+                    itemStyle: {
+                        color: sectorColors[nace],
+                        opacity: isHighlighted ? 1 : 0.15
+                    },
+                    emphasis: { focus: 'series' }
+                };
+            });
+
+            sdiTrendChart.setOption({
+                series: [
+                    ...series,
+                    {
+                        type: 'line',
+                        name: 'EU27 = 100',
+                        data: years.map(() => 100),
+                        lineStyle: { type: 'dashed', color: '#A0AEC0', width: 2 },
+                        symbol: 'none',
+                        itemStyle: { color: '#A0AEC0' }
+                    }
+                ]
+            });
+
+            // Update subtitle
+            if (selectedSector) {
+                document.getElementById('sdi-trend-subtitle').textContent =
+                    `Showing: ${naceLabels[selectedSector]} (click again to deselect)`;
+            } else {
+                document.getElementById('sdi-trend-subtitle').textContent =
+                    `SDI composite trend by sector (click a sector above to highlight)`;
             }
         }
 
-        async function renderGVAChart(geo, chartId, metaId) {
-            const chartDom = document.getElementById(chartId);
-            const metaInfo = document.getElementById(metaId);
-
-            try {
-                const naces = 'A,B-E,F,G-I,J,K,L,M_N,O-Q,R-U';
-                const result = await fetchData(`dataset=nama_10_a10&geo=${geo}&time=2010-2024&unit=PC_GDP&na_item=B1G&nace_r2=${naces}`);
-                const { years, series } = prepareStackedAreaData(result.data, naceLabels);
-
-                const chart = echarts.init(chartDom);
-                chart.setOption({
-                    tooltip: {
-                        trigger: 'axis',
-                        axisPointer: { type: 'cross' },
-                        formatter: params => {
-                            let tip = `<strong>${params[0].axisValue}</strong><br/>`;
-                            let total = 0;
-                            params.forEach(p => {
-                                if (p.value !== null) {
-                                    tip += `${p.marker} ${p.seriesName}: <strong>${p.value.toFixed(1)}%</strong><br/>`;
-                                    total += p.value;
-                                }
-                            });
-                            tip += `<strong>Total: ${total.toFixed(1)}%</strong>`;
-                            return tip;
-                        }
-                    },
-                    legend: {
-                        data: series.map(s => s.name),
-                        bottom: 0,
-                        type: 'scroll',
-                        textStyle: { fontSize: 10 }
-                    },
-                    grid: { left: '3%', right: '4%', bottom: '18%', top: '5%', containLabel: true },
-                    xAxis: { type: 'category', data: years, boundaryGap: false },
-                    yAxis: {
-                        type: 'value',
-                        name: '% of GDP',
-                        nameLocation: 'middle',
-                        nameGap: 40,
-                        max: 100
-                    },
-                    series: series,
-                    color: sectorColors
-                });
-                window.addEventListener('resize', () => chart.resize());
-                metaInfo.textContent = `Dataset: nama_10_a10 | ${result.cached ? 'Cached' : 'Fresh'} | Source: Eurostat`;
-            } catch (error) {
-                chartDom.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        }
-
-        // Initialize all charts
+        // ==================== INITIALIZE ====================
         document.addEventListener('DOMContentLoaded', () => {
-            renderGDPChart();
-            renderProductivityChart();
-            renderGVAChart('BG', 'gva-bg-chart', 'gva-bg-meta');
-            renderGVAChart('EU27_2020', 'gva-eu-chart', 'gva-eu-meta');
+            pageInitialized.home = true;
+            initHomePage();
         });
     </script>
 </body>
