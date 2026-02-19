@@ -1,0 +1,643 @@
+---
+title: ""
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    logo: ""
+    transition: slide
+    transition-speed: default
+    slide-number: true
+    scrollable: true
+    width: 1280
+    height: 720
+    center: false
+    highlight-style: github
+    code-fold: true
+    embed-resources: true
+    title-slide-attributes:
+      data-background-color: "#1a365d"
+    include-in-header:
+      text: |
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+execute:
+  echo: false
+  warning: false
+---
+
+## {.center background-color="#1a365d" visibility="uncounted"}
+
+```{=html}
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px 0;">
+
+  <div style="font-size: 64px; font-weight: 800; color: white; letter-spacing: -1px; margin-bottom: 12px;">Eurostat Dashboard</div>
+  <div style="width: 80px; height: 3px; background: linear-gradient(90deg, #90CDF4, #FBD38D); border-radius: 2px; margin-bottom: 20px;"></div>
+  <div style="font-size: 22px; color: rgba(255,255,255,0.8); font-weight: 300; margin-bottom: 48px;">Аналитична платформа за икономическо сближаване</div>
+  <div style="display: flex; gap: 40px; margin-top: 16px;">
+    <div style="text-align: center;">
+      <div style="font-size: 32px; font-weight: 700; color: #90CDF4;">3</div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Модула</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 32px; font-weight: 700; color: #90CDF4;">10</div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">NACE сектора</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: 32px; font-weight: 700; color: #90CDF4;">В реално време</div>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px;">Данни</div>
+    </div>
+  </div>
+  <div style="margin-top: 48px; font-size: 14px; color: rgba(255,255,255,0.35);">visiometrica.com</div>
+</div>
+```
+
+---
+
+## Контекст и проблем {background-color="#1a365d"}
+
+```{=html}
+<div style="display: flex; align-items: center; gap: 60px; padding: 20px 0;">
+  <div class="fragment fade-in" style="flex: 0 0 280px; text-align: center;">
+    <div style="font-size: 96px; font-weight: 800; color: white; line-height: 1;">~66%</div>
+    <div style="font-size: 15px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 8px;">от средното за OECD</div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 4px;">БВП на глава (PPP, 2026)</div>
+  </div>
+  <div style="flex: 1;">
+```
+
+::: {.incremental}
+- Липса на единен аналитичен инструмент за мониторинг на секторната конвергенция
+- Решенията за публични политики се взимат **без систематичен data-driven анализ** по сектори
+- Съществуващите данни на Eurostat и OECD са разпръснати и трудни за интерпретация
+:::
+
+::: {.fragment .fade-up}
+::: {.callout-important}
+## Предизвикателство
+Как да измерим и визуализираме секторния напредък на България спрямо ЕС27 — в реално време, с консистентна методология?
+:::
+:::
+
+```{=html}
+  </div>
+</div>
+```
+
+---
+
+## Решението: Eurostat Dashboard {background-color="#f7fafc"}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.incremental}
+- **Real-time данни** от Eurostat API и OECD API
+- **Три аналитични модула**: макро KPI, секторен преглед, SDI-EU индекс
+- **Интерактивни визуализации** с ECharts
+- Автоматичен **24-часов кеш** (SQLite) — бързина без загуба на актуалност
+- **Авторска методология** — Sector Development Index (SDI-EU)
+:::
+
+:::
+
+::: {.column width="50%"}
+
+```{=html}
+<div style="background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.10); padding: 28px 24px; margin-top: 10px;">
+  <div style="font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 600;">Архитектура</div>
+
+  <svg viewBox="0 0 380 340" style="width: 100%; height: auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <!-- Data Sources Layer -->
+    <rect x="20" y="10" width="155" height="44" rx="8" fill="#EBF8FF" stroke="#BEE3F8" stroke-width="1.5"/>
+    <text x="97" y="37" text-anchor="middle" fill="#2B6CB0" font-size="13" font-weight="600">Eurostat API</text>
+    <rect x="205" y="10" width="155" height="44" rx="8" fill="#EBF8FF" stroke="#BEE3F8" stroke-width="1.5"/>
+    <text x="282" y="37" text-anchor="middle" fill="#2B6CB0" font-size="13" font-weight="600">OECD API</text>
+
+    <!-- Connector lines from APIs to Backend -->
+    <path d="M97,54 L97,80 Q97,90 107,90 L170,90" fill="none" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <path d="M282,54 L282,80 Q282,90 272,90 L210,90" fill="none" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <!-- Merge point -->
+    <circle cx="190" cy="90" r="4" fill="#A0AEC0"/>
+
+    <!-- Vertical connector to backend -->
+    <line x1="190" y1="94" x2="190" y2="110" stroke="#A0AEC0" stroke-width="1.5"/>
+    <polygon points="186,108 190,116 194,108" fill="#A0AEC0"/>
+
+    <!-- Backend Layer -->
+    <rect x="50" y="118" width="280" height="52" rx="10" fill="#F0FFF4" stroke="#C6F6D5" stroke-width="1.5"/>
+    <text x="190" y="140" text-anchor="middle" fill="#276749" font-size="13.5" font-weight="700">FastAPI Backend</text>
+    <text x="190" y="158" text-anchor="middle" fill="#48BB78" font-size="11">Python 3.13 · httpx · pandas · pyjstat</text>
+
+    <!-- Cache badge -->
+    <rect x="295" y="125" width="70" height="28" rx="6" fill="#FEFCBF" stroke="#F6E05E" stroke-width="1"/>
+    <text x="330" y="144" text-anchor="middle" fill="#975A16" font-size="10" font-weight="600">SQLite 24h</text>
+
+    <!-- Connector to frontend -->
+    <line x1="190" y1="170" x2="190" y2="192" stroke="#A0AEC0" stroke-width="1.5"/>
+    <polygon points="186,190 190,198 194,190" fill="#A0AEC0"/>
+    <text x="210" y="188" fill="#A0AEC0" font-size="9.5">REST JSON</text>
+
+    <!-- Frontend Layer -->
+    <rect x="50" y="200" width="280" height="52" rx="10" fill="#FAF5FF" stroke="#E9D8FD" stroke-width="1.5"/>
+    <text x="190" y="222" text-anchor="middle" fill="#553C9A" font-size="13.5" font-weight="700">Интерактивен Frontend</text>
+    <text x="190" y="240" text-anchor="middle" fill="#9F7AEA" font-size="11">Vanilla JS · ECharts 5.4 · SPA</text>
+
+    <!-- Connector to deploy -->
+    <line x1="190" y1="252" x2="190" y2="274" stroke="#A0AEC0" stroke-width="1.5"/>
+    <polygon points="186,272 190,280 194,272" fill="#A0AEC0"/>
+
+    <!-- Deployment Layer -->
+    <rect x="20" y="282" width="105" height="40" rx="8" fill="#FFFAF0" stroke="#FEEBC8" stroke-width="1.5"/>
+    <text x="72" y="300" text-anchor="middle" fill="#9C4221" font-size="11" font-weight="600">Railway</text>
+    <text x="72" y="314" text-anchor="middle" fill="#C05621" font-size="9">Backend</text>
+
+    <rect x="138" y="282" width="105" height="40" rx="8" fill="#FFFAF0" stroke="#FEEBC8" stroke-width="1.5"/>
+    <text x="190" y="300" text-anchor="middle" fill="#9C4221" font-size="11" font-weight="600">Vercel</text>
+    <text x="190" y="314" text-anchor="middle" fill="#C05621" font-size="9">Frontend</text>
+
+    <rect x="256" y="282" width="105" height="40" rx="8" fill="#FFFAF0" stroke="#FEEBC8" stroke-width="1.5"/>
+    <text x="308" y="304" text-anchor="middle" fill="#9C4221" font-size="11" font-weight="700">visiometrica.com</text>
+
+    <!-- Lines from deploy center to each box -->
+    <line x1="140" y1="280" x2="72" y2="282" stroke="#A0AEC0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="190" y1="280" x2="190" y2="282" stroke="#A0AEC0" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="240" y1="280" x2="308" y2="282" stroke="#A0AEC0" stroke-width="1" stroke-dasharray="3,2"/>
+  </svg>
+</div>
+```
+
+:::
+
+::::
+
+---
+
+## Модул 1: Макро KPI и международно сравнение {background-color="#f7fafc"}
+
+:::: {.columns}
+
+::: {.column width="40%"}
+::: {.fragment .fade-right}
+**Ключови индикатори** с данни от OECD Economic Outlook:
+
+- **БВП на глава** (PPP, USD) — България спрямо средното за OECD
+- **Безработица** — процентни пунктове разлика
+- **Държавен дълг** (% от БВП)
+
+Тренд анализ: 2015–2026 за 7 държави + OECD средно
+:::
+:::
+
+::: {.column width="60%"}
+
+```{=html}
+<div id="gdp-comparison-slide" style="width: 100%; height: 420px;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait for Reveal.js to be ready and the slide to be visible
+  function initGdpChart() {
+    var chartDom = document.getElementById('gdp-comparison-slide');
+    if (!chartDom || chartDom.offsetWidth === 0) {
+      setTimeout(initGdpChart, 200);
+      return;
+    }
+    var chart = echarts.init(chartDom);
+
+    var countries = ['Bulgaria', 'Japan', 'UK', 'OECD Avg', 'Canada', 'South Korea', 'Australia', 'USA'];
+    var values = [36574, 47484, 54232, 55122, 56856, 57070, 62730, 78179];
+    var colors = countries.map(function(c) {
+      return c === 'Bulgaria' ? '#E53E3E' : (c === 'OECD Avg' ? '#718096' : '#3182CE');
+    });
+
+    chart.setOption({
+      animation: true,
+      animationDuration: 1500,
+      animationEasing: 'cubicOut',
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: function(params) {
+          return '<strong>' + params[0].name + '</strong><br/>GDP per capita: <strong>$' + params[0].value.toLocaleString() + '</strong>';
+        }
+      },
+      grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
+      xAxis: {
+        type: 'value',
+        axisLabel: { formatter: function(v) { return '$' + (v/1000).toFixed(0) + 'K'; } }
+      },
+      yAxis: {
+        type: 'category',
+        data: countries,
+        axisLabel: { fontSize: 13 }
+      },
+      series: [{
+        type: 'bar',
+        data: values.map(function(v, i) {
+          return { value: v, itemStyle: { color: colors[i], borderRadius: [0, 4, 4, 0] } };
+        }),
+        barWidth: '60%',
+        label: {
+          show: true,
+          position: 'right',
+          formatter: function(p) { return '$' + p.value.toLocaleString(); },
+          fontSize: 12,
+          color: '#4a5568'
+        }
+      }]
+    });
+
+    window.addEventListener('resize', function() { chart.resize(); });
+    if (typeof Reveal !== 'undefined') {
+      Reveal.on('slidechanged', function() { setTimeout(function() { chart.resize(); }, 100); });
+    }
+  }
+  initGdpChart();
+});
+</script>
+```
+
+::: {.fragment .fade-up style="font-size: 0.7em; color: #718096; margin-top: 4px;"}
+Данни: OECD Economic Outlook | PPP, USD, 2026
+:::
+:::
+
+::::
+
+---
+
+## Модул 2: Секторна структура — България vs ЕС27 {background-color="#f7fafc"}
+
+```{=html}
+<div id="sector-slide-chart" style="width: 100%; height: 480px;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function initSectorChart() {
+    var chartDom = document.getElementById('sector-slide-chart');
+    if (!chartDom || chartDom.offsetWidth === 0) {
+      setTimeout(initSectorChart, 200);
+      return;
+    }
+    var chart = echarts.init(chartDom);
+
+    var sectors = ['Agriculture', 'Industry', 'Construction', 'Trade & Transport', 'ICT', 'Finance', 'Real Estate', 'Professional Svcs', 'Public Admin', 'Arts & Other'];
+    var bgData =  [4.4, 20.3, 5.0, 19.5, 6.8, 4.8, 7.7, 6.3, 14.3, 3.0];
+    var euData =  [1.8, 19.3, 5.6, 18.6, 5.4, 4.2, 10.7, 11.2, 18.2, 3.3];
+
+    chart.setOption({
+      animation: true,
+      animationDuration: 1200,
+      animationDelay: function(idx) { return idx * 80; },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: function(params) {
+          var bg = params.find(function(p) { return p.seriesName === 'България'; });
+          var eu = params.find(function(p) { return p.seriesName === 'ЕС27'; });
+          var tip = '<strong>' + params[0].name + '</strong><br/>';
+          if (bg) tip += bg.marker + ' България: <strong>' + bg.value + '%</strong><br/>';
+          if (eu) tip += eu.marker + ' ЕС27: <strong>' + eu.value + '%</strong><br/>';
+          if (bg && eu) {
+            var diff = (bg.value - eu.value).toFixed(1);
+            var sign = diff > 0 ? '+' : '';
+            var color = diff > 0 ? '#38A169' : '#E53E3E';
+            tip += '<span style="color:' + color + '">Разлика: <strong>' + sign + diff + ' п.п.</strong></span>';
+          }
+          return tip;
+        }
+      },
+      legend: { data: ['България', 'ЕС27'], bottom: 0 },
+      grid: { left: '3%', right: '4%', bottom: '12%', top: '5%', containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: sectors,
+        axisLabel: { rotate: 30, fontSize: 11, interval: 0 }
+      },
+      yAxis: {
+        type: 'value',
+        name: '% от БВП',
+        axisLabel: { formatter: '{value}%' }
+      },
+      series: [
+        {
+          name: 'България',
+          type: 'bar',
+          data: bgData,
+          itemStyle: { color: '#3182CE', borderRadius: [4, 4, 0, 0] },
+          barGap: '20%',
+          label: { show: true, position: 'top', fontSize: 10, color: '#3182CE', formatter: function(p) { return p.value + '%'; } }
+        },
+        {
+          name: 'ЕС27',
+          type: 'bar',
+          data: euData,
+          itemStyle: { color: '#CBD5E0', borderColor: '#A0AEC0', borderWidth: 1, borderType: 'dashed', borderRadius: [4, 4, 0, 0] },
+          label: { show: true, position: 'top', fontSize: 10, color: '#718096', formatter: function(p) { return p.value + '%'; } }
+        }
+      ]
+    });
+
+    window.addEventListener('resize', function() { chart.resize(); });
+    if (typeof Reveal !== 'undefined') {
+      Reveal.on('slidechanged', function() { setTimeout(function() { chart.resize(); }, 100); });
+    }
+  }
+  initSectorChart();
+});
+</script>
+```
+
+::: {.fragment .fade-up}
+::: {.callout-note}
+## Ключов извод
+България има **по-висок дял** на индустрия, селско стопанство и ИКТ, но **значително изостава** в професионалните услуги и публичната администрация. Тази секторна специализация е важен фактор за стратегическото планиране.
+:::
+:::
+
+::: {style="font-size: 0.65em; color: #718096; margin-top: 8px;"}
+Данни: Eurostat `nama_10_a10` | Gross Value Added (B1G), % от БВП | 2023
+:::
+
+---
+
+## Модул 3: SDI-EU — Sector Development Index {background-color="#f7fafc"}
+
+:::: {.columns}
+
+::: {.column width="35%"}
+::: {.fragment .fade-right}
+**Авторска методология** за измерване на секторното сближаване:
+
+$$SDI = \sqrt[3]{LP \times Comp \times Inv}$$
+
+**Три стълба** (EU27 = 100):
+
+- **LP** — Labour Productivity (БДС / заетост)
+- **Comp** — Compensation per Employee
+- **Inv** — Investment Intensity (GFCF / БДС)
+
+Цветово кодиране по степен на конвергенция
+:::
+:::
+
+::: {.column width="65%"}
+```{=html}
+<div id="sdi-slide-chart" style="width: 100%; height: 480px;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function initSdiChart() {
+    var chartDom = document.getElementById('sdi-slide-chart');
+    if (!chartDom || chartDom.offsetWidth === 0) {
+      setTimeout(initSdiChart, 200);
+      return;
+    }
+    var chart = echarts.init(chartDom);
+
+    function sdiColor(value) {
+      if (value < 80) return '#E53E3E';
+      if (value < 95) return '#ED8936';
+      if (value < 105) return '#48BB78';
+      if (value < 120) return '#3182CE';
+      return '#1A365D';
+    }
+
+    var sectors = ['Real Estate', 'Finance', 'Agriculture', 'Industry', 'Professional Svcs', 'Trade & Transport', 'Arts & Other', 'ICT', 'Public Admin', 'Construction'];
+    var sdiValues = [31.1, 34.6, 36.8, 41.9, 49.6, 49.6, 52.1, 56.1, 59.1, 84.8];
+
+    chart.setOption({
+      animation: true,
+      animationDuration: 1500,
+      animationEasing: 'elasticOut',
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: function(params) {
+          var p = params[0];
+          var band = p.value < 80 ? 'Значително под ЕС' : (p.value < 95 ? 'Под ЕС' : (p.value < 105 ? 'На ниво ЕС' : (p.value < 120 ? 'Над ЕС' : 'Значително над ЕС')));
+          return '<strong>' + p.name + '</strong><br/>SDI: <strong>' + p.value + '</strong><br/><span style="color:' + sdiColor(p.value) + '">' + band + '</span>';
+        }
+      },
+      grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
+      xAxis: {
+        type: 'value',
+        name: 'SDI Score',
+        max: 110
+      },
+      yAxis: {
+        type: 'category',
+        data: sectors,
+        axisLabel: { fontSize: 12 }
+      },
+      series: [{
+        type: 'bar',
+        data: sdiValues.map(function(v) {
+          return { value: v, itemStyle: { color: sdiColor(v), borderRadius: [0, 4, 4, 0] } };
+        }),
+        barWidth: '65%',
+        label: {
+          show: true,
+          position: 'right',
+          formatter: function(p) { return p.value.toFixed(1); },
+          fontSize: 12,
+          color: '#4a5568'
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          lineStyle: { type: 'dashed', color: '#A0AEC0', width: 2 },
+          label: { formatter: 'EU27 = 100', position: 'end', color: '#718096', fontSize: 11 },
+          data: [{ xAxis: 100 }]
+        }
+      }]
+    });
+
+    window.addEventListener('resize', function() { chart.resize(); });
+    if (typeof Reveal !== 'undefined') {
+      Reveal.on('slidechanged', function() { setTimeout(function() { chart.resize(); }, 100); });
+    }
+  }
+  initSdiChart();
+});
+</script>
+```
+:::
+
+::::
+
+::: {.fragment .fade-up style="font-size: 0.7em;"}
+| Цвят | Обхват | Значение |
+|------|--------|----------|
+| 🔴 Червено | SDI < 80 | Значително под ЕС |
+| 🟠 Оранжево | 80–95 | Под ЕС |
+| 🟢 Зелено | 95–105 | На ниво ЕС |
+| 🔵 Синьо | 105–120 | Над ЕС |
+| ⬛ Тъмносиньо | > 120 | Значително над ЕС |
+:::
+
+---
+
+## SDI-EU: Тенденции на конвергенция (2015–2023) {background-color="#f7fafc"}
+
+```{=html}
+<div id="sdi-trend-slide-chart" style="width: 100%; height: 460px;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function initSdiTrend() {
+    var chartDom = document.getElementById('sdi-trend-slide-chart');
+    if (!chartDom || chartDom.offsetWidth === 0) {
+      setTimeout(initSdiTrend, 200);
+      return;
+    }
+    var chart = echarts.init(chartDom);
+
+    var years = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'];
+
+    var sectorData = {
+      'Construction':     [69.4, 67.1, 69.9, 71.9, 76.1, 76.9, 80.7, 84.8],
+      'Public Admin':     [37.0, 40.2, 44.3, 50.0, 52.9, 50.8, 54.2, 59.1],
+      'ICT':              [36.2, 43.6, 45.9, 51.2, 39.8, 51.1, 52.0, 56.1],
+      'Arts & Other':     [43.0, 40.1, 41.0, 42.9, 42.1, 41.7, 47.2, 52.1],
+      'Trade & Transport':[41.2, 40.2, 42.9, 41.6, 49.9, 44.3, 46.6, 49.6],
+      'Professional Svcs':[36.9, 41.7, 40.4, 40.2, 41.6, 42.6, 48.1, 49.6],
+      'Industry':         [35.0, 35.0, 34.5, 34.3, 35.1, 36.0, 38.7, 41.9],
+      'Agriculture':      [28.4, 29.1, 30.8, 30.5, 29.8, 31.6, 36.3, 36.8],
+      'Finance':          [30.4, 33.3, 34.1, 33.6, 40.0, 35.3, 39.0, 34.6],
+      'Real Estate':      [19.9, 29.0, 30.8, 28.3, 27.8, 28.2, 29.8, 31.1]
+    };
+
+    var colors = {
+      'Construction': '#D69E2E',
+      'Public Admin': '#2B6CB0',
+      'ICT': '#319795',
+      'Arts & Other': '#975A16',
+      'Trade & Transport': '#38A169',
+      'Professional Svcs': '#D53F8C',
+      'Industry': '#DD6B20',
+      'Agriculture': '#E53E3E',
+      'Finance': '#805AD5',
+      'Real Estate': '#9F7AEA'
+    };
+
+    var series = Object.keys(sectorData).map(function(name) {
+      return {
+        name: name,
+        type: 'line',
+        data: sectorData[name],
+        smooth: true,
+        lineStyle: { width: name === 'Construction' ? 4 : 2 },
+        symbolSize: name === 'Construction' ? 8 : 4,
+        itemStyle: { color: colors[name] },
+        emphasis: { focus: 'series' }
+      };
+    });
+
+    // EU = 100 reference line
+    series.push({
+      name: 'EU27 = 100',
+      type: 'line',
+      data: years.map(function() { return 100; }),
+      lineStyle: { type: 'dashed', color: '#A0AEC0', width: 2 },
+      symbol: 'none',
+      itemStyle: { color: '#A0AEC0' },
+      tooltip: { show: false }
+    });
+
+    chart.setOption({
+      animation: true,
+      animationDuration: 2000,
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          var tip = '<strong>' + params[0].axisValue + '</strong><br/>';
+          params.sort(function(a, b) { return (b.value || 0) - (a.value || 0); });
+          params.forEach(function(p) {
+            if (p.value !== null && p.seriesName !== 'EU27 = 100') {
+              tip += p.marker + ' ' + p.seriesName + ': <strong>' + p.value.toFixed(1) + '</strong><br/>';
+            }
+          });
+          return tip;
+        }
+      },
+      legend: { data: Object.keys(sectorData).concat(['EU27 = 100']), bottom: 0, type: 'scroll', textStyle: { fontSize: 11 } },
+      grid: { left: '3%', right: '4%', bottom: '14%', top: '5%', containLabel: true },
+      xAxis: { type: 'category', data: years },
+      yAxis: {
+        type: 'value',
+        name: 'SDI Score',
+        nameLocation: 'middle',
+        nameGap: 45
+      },
+      series: series
+    });
+
+    window.addEventListener('resize', function() { chart.resize(); });
+    if (typeof Reveal !== 'undefined') {
+      Reveal.on('slidechanged', function() { setTimeout(function() { chart.resize(); }, 100); });
+    }
+  }
+  initSdiTrend();
+});
+</script>
+```
+
+::: {.fragment .fade-up}
+::: {.callout-tip}
+## Позитивен тренд
+Строителството е **най-близкият до ЕС27 сектор** (SDI ≈ 85), с устойчив ръст от 69 до 85 за периода. ИКТ и публичната администрация показват **най-бърза конвергенция** (~3 пункта годишно). В интерактивния dashboard кликането върху сектор го подчертава във всички панели едновременно.
+:::
+:::
+
+---
+
+## Защо да ни подкрепите? {.center background-color="#1a365d"}
+
+
+::: {.r-fit-text style="color: white;"}
+Резултати и визия
+:::
+
+:::: {.columns}
+
+::: {.column width="50%"}
+::: {.fragment .fade-right}
+```{=html}
+<div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin: 8px 0; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+  <div style="color: #90CDF4; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Какво е направено</div>
+  <ul style="color: white; font-size: 16px; line-height: 2;">
+    <li>✔ Работеща платформа на <strong>visiometrica.com</strong></li>
+    <li>✔ 3 аналитични модула с live данни</li>
+    <li>✔ Авторски SDI-EU индекс</li>
+    <li>✔ Покритие: 10 NACE сектора × 3 стълба</li>
+    <li>✔ Deployment: Railway + Vercel</li>
+  </ul>
+</div>
+```
+:::
+:::
+
+::: {.column width="50%"}
+::: {.fragment .fade-left}
+```{=html}
+<div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin: 8px 0; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+  <div style="color: #FBD38D; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Какво следва</div>
+  <ul style="color: white; font-size: 16px; line-height: 2;">
+    <li>→ Разширяване до <strong>всички 27 държави</strong></li>
+    <li>→ Модул за <strong>прогнозиране</strong> (ML forecasting)</li>
+    <li>→ <strong>PDF / XLSX</strong> експорт на доклади</li>
+    <li>→ <strong>Алертна система</strong> при аномалии в данните</li>
+    <li>→ Интеграция с <strong>национална статистика</strong> (НСИ)</li>
+  </ul>
+</div>
+```
+:::
+:::
+
+::::
+
+::: {.fragment .fade-up}
+```{=html}
+<div style="text-align: center; margin-top: 30px; padding: 16px 32px; background: rgba(255,255,255,0.15); border-radius: 12px; display: inline-block; border: 1px solid rgba(255,255,255,0.3);">
+  <span style="color: #FBD38D; font-size: 20px; font-weight: 600;">🌐 visiometrica.com</span>
+  <span style="color: rgba(255,255,255,0.7); font-size: 16px; margin-left: 16px;">Демо достъпно сега</span>
+</div>
+```
+:::

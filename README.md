@@ -2,6 +2,8 @@
 
 A dashboard application that visualizes economic indicators from Eurostat, comparing Bulgaria with the EU27 average.
 
+**[Live Dashboard](https://visiometrica.com)** · **[Presentation Slides](https://quantumjazz.github.io/eurostat-dashboard/)**
+
 ## Features
 
 - **GDP per Capita** - Chain linked volumes (2020), euro per capita
@@ -19,6 +21,10 @@ eurostat_dashboard/
 │   └── railway.json        # Railway config
 ├── frontend/               # Static dashboard (deployed to Vercel)
 │   └── index.html          # Single-page app with ECharts
+├── slides/                  # Quarto Reveal.js presentation (GitHub Pages)
+│   ├── presentation.qmd    # Quarto source
+│   ├── presentation.html   # Compiled self-contained slides
+│   └── custom.scss         # Reveal.js theme overrides
 ├── cache/                  # SQLite cache (gitignored)
 ├── DEPLOYMENT.md           # Step-by-step deployment guide
 └── README.md

@@ -1,0 +1,75 @@
+/*-- scss:defaults --*/
+$presentation-heading-color: #1a365d;
+$body-color: #2d3748;
+$link-color: #3182ce;
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+/*-- scss:rules --*/
+.reveal .slide-background-content {
+  background-size: cover;
+}
+
+.reveal h2 {
+  font-weight: 700;
+  margin-bottom: 0.6em;
+}
+
+.reveal .callout {
+  font-size: 0.85em;
+}
+
+.reveal .callout-important .callout-title {
+  font-weight: 700;
+}
+
+.reveal ul li {
+  margin-bottom: 0.3em;
+}
+
+.reveal .columns {
+  align-items: flex-start;
+}
+
+/* KPI-style highlight numbers */
+.kpi-highlight {
+  font-size: 2.5em;
+  font-weight: 800;
+  color: #1a365d;
+  line-height: 1.2;
+}
+
+.kpi-label {
+  font-size: 0.7em;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Slide-specific */
+.reveal section[data-background-color="#1a365d"] h2,
+.reveal section[data-background-color="#1a365d"] p,
+.reveal section[data-background-color="#1a365d"] li {
+  color: white;
+}
+
+.reveal section[data-background-color="#1a365d"] .callout {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* Table styling */
+.reveal table {
+  font-size: 0.75em;
+  margin: 0.5em auto;
+}
+
+.reveal table th {
+  background: #EDF2F7;
+  color: #1a365d;
+}
+
+.reveal table td, .reveal table th {
+  padding: 6px 12px;
+  border: 1px solid #E2E8F0;
+}
